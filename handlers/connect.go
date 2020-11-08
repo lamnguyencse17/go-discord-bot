@@ -5,6 +5,7 @@ import (
 	types "github.com/lamnguyencse17/go-discord-bot/types"
 	"github.com/mitchellh/mapstructure"
 	"log"
+	"os"
 )
 
 func InitConnection(response types.Response){
@@ -22,7 +23,7 @@ func IdentifyConnection(){
 	var IdentifyData types.IdentifyData
 	var IdentifyDataProperties types.IdentifyDataProperties
 	IdentifyRequest.OPCODE = 2
-	IdentifyData.TOKEN = "NjIxMjMzMDEyMDkyNDM2NTAw.XXiWVA.t8wyUeY3ToOp9qWT2f98iqkVSDk"
+	IdentifyData.TOKEN = os.Getenv("discord_token")
 	IdentifyData.INTENTS = 513
 	IdentifyDataProperties.BROWSER = "zodiac3011"
 	IdentifyDataProperties.DEVICE = "zodiac3011"

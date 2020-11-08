@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/lamnguyencse17/go-discord-bot/handlers"
+
 	//"github.com/lamnguyencse17/go-discord-bot/handlers"
 	client "github.com/lamnguyencse17/go-discord-bot/session"
 	types "github.com/lamnguyencse17/go-discord-bot/types"
@@ -32,7 +34,7 @@ func processOPCODE (response types.Response){
 	switch response.OPCODE {
 	case 10:
 		client.Session.InitHeartbeatAck()
-		//handlers.InitConnection(response)
+		handlers.InitConnection(response)
 	case 11:
 		log.Printf("Acknowledged Heartbeat")
 		client.Session.ToggleHeartbeatACK()
