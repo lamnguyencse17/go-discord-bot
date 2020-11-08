@@ -1,14 +1,18 @@
 package session
 
 import (
-	"github.com/gorilla/websocket")
+	"github.com/gorilla/websocket"
+	"sync"
+)
 
 type Client struct {
+	mu sync.Mutex
 	gateway           string
 	sequence          int
 	token             string
 	heartbeatInterval int
 	connection *websocket.Conn
+	waitingHeartbeatACK bool
 }
 
 var Session Client
@@ -22,7 +26,21 @@ func (client *Client) SetConnection(connection *websocket.Conn){
 }
 
 func (client *Client) SetSequence(sequence int) {
+	client.mu.Lock()
 	client.sequence = sequence
+	client.mu.Unlock()
+}
+
+func (client *Client) InitHeartbeatAck() {
+	client.mu.Lock()
+	client.waitingHeartbeatACK = false
+	client.mu.Unlock()
+}
+
+func (client *Client) ToggleHeartbeatACK() {
+	client.mu.Lock()
+	client.waitingHeartbeatACK = !client.waitingHeartbeatACK
+	client.mu.Unlock()
 }
 
 func (client *Client) SetToken(token string) {
@@ -38,6 +56,8 @@ func (client *Client) Gateway() string {
 }
 
 func (client *Client) Sequence() int {
+	client.mu.Lock()
+	defer client.mu.Unlock()
 	return client.sequence
 }
 
@@ -51,4 +71,10 @@ func (client *Client) Connection() *websocket.Conn {
 
 func (client *Client) HearbeatInterval() int {
 	return client.heartbeatInterval
+}
+
+func (client *Client) HeartbeatACK() bool{
+	client.mu.Lock()
+	defer client.mu.Unlock()
+	return client.waitingHeartbeatACK
 }

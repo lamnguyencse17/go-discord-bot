@@ -6,8 +6,3 @@ type Response struct {
 	SEQUENCE int `json:"s"`
 	EVENT string `json:"t"`
 }
-
-type ConnectionData struct {
-	MISC []map[string]interface{} `json:"_trace"`
-	INTERVAL int `json:"heartbeat_interval"`
-}

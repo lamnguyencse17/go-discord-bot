@@ -34,12 +34,19 @@ func main() {
 	defer c.Close()
 	done := make(chan bool)
 	go EventHandler(done)
+	stoppedBeating := make(chan bool)
+	go Heartbeat(stoppedBeating)
 	for {
 		select {
 		case closed := <-done:
 			if !closed {
 				log.Printf("Done")
-				return
+				os.Exit(0)
+			}
+		case beatFail := <-stoppedBeating:
+			if beatFail {
+				log.Printf("Failed Beating")
+				os.Exit(0)
 			}
 		}
 	}
