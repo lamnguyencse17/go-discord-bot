@@ -33,9 +33,17 @@ func main() {
 	}
 	defer c.Close()
 	done := make(chan bool)
-	go EventHandler(done)
+	startBeating := make(chan bool)
+	go MessageListener(done, startBeating)
 	stoppedBeating := make(chan bool)
-	go Heartbeat(stoppedBeating)
+	for {
+		if heartbeat := <-startBeating; !heartbeat{
+			log.Printf("Start Beating? %v", <-startBeating)
+			log.Printf("%v", client.Session.HearbeatInterval())
+			go Heartbeat(stoppedBeating)
+			break
+		}
+	}
 	for {
 		select {
 		case closed := <-done:

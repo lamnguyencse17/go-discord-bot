@@ -1,10 +1,5 @@
 package types
 
-type ConnectionData struct {
-	MISC []map[string]interface{} `json:"_trace"`
-	INTERVAL int `json:"heartbeat_interval"`
-}
-
 type IdentifyRequest struct {
 	OPCODE int `json:"op"`
 	DATA IdentifyData `json:"d"`

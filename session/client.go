@@ -2,6 +2,7 @@ package session
 
 import (
 	"github.com/gorilla/websocket"
+	"github.com/lamnguyencse17/go-discord-bot/types"
 	"sync"
 )
 
@@ -12,7 +13,9 @@ type Client struct {
 	token             string
 	heartbeatInterval int
 	connection *websocket.Conn
+	session_id string
 	waitingHeartbeatACK bool
+	user types.User
 }
 
 var Session Client
@@ -23,6 +26,10 @@ func (client *Client) SetGateway(gateway string) {
 
 func (client *Client) SetConnection(connection *websocket.Conn){
 	client.connection = connection
+}
+
+func (client *Client) SetUser(user types.User){
+	client.user = user
 }
 
 func (client *Client) SetSequence(sequence int) {
@@ -43,22 +50,28 @@ func (client *Client) ToggleHeartbeatACK() {
 	client.mu.Unlock()
 }
 
+func (client *Client) SetSessionID(sessionID string){
+	client.session_id = sessionID
+}
+
 func (client *Client) SetToken(token string) {
 	client.token = token
 }
 
 func (client *Client) SetHeartbeatInterval(interval int) {
+	client.mu.Lock()
 	client.heartbeatInterval = interval
+	client.mu.Unlock()
 }
 
 func (client *Client) Gateway() string {
 	return client.gateway
 }
 
-func (client *Client) Sequence() int {
+func (client *Client) Sequence() *int {
 	client.mu.Lock()
 	defer client.mu.Unlock()
-	return client.sequence
+	return &client.sequence
 }
 
 func (client *Client) Token() string {
@@ -70,6 +83,8 @@ func (client *Client) Connection() *websocket.Conn {
 }
 
 func (client *Client) HearbeatInterval() int {
+	client.mu.Lock()
+	defer client.mu.Unlock()
 	return client.heartbeatInterval
 }
 
@@ -77,4 +92,12 @@ func (client *Client) HeartbeatACK() bool{
 	client.mu.Lock()
 	defer client.mu.Unlock()
 	return client.waitingHeartbeatACK
+}
+
+func (client *Client) User() types.User{
+	return client.user
+}
+
+func (client *Client) SessionID() string{
+	return client.session_id
 }

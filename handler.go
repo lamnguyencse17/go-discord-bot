@@ -10,9 +10,9 @@ import (
 	"log"
 )
 
-func EventHandler (done chan bool){
+func MessageListener(done chan bool, startBeating chan bool){
+	startBeating <- false
 	defer close(done)
-
 	var response = types.Response{}
 	for {
 		_, message, err := client.Session.Connection().ReadMessage()
@@ -26,18 +26,31 @@ func EventHandler (done chan bool){
 		}
 		log.Printf("raw: %s\n", message)
 		log.Printf("recv: %v\n", response)
-		processOPCODE(response)
+		processOPCODE(response, response.OPCODE, startBeating)
 	}
 }
 
-func processOPCODE (response types.Response){
-	switch response.OPCODE {
+func processOPCODE (response types.Response, OPCODE int, startBeating chan bool){
+	switch OPCODE {
 	case 10:
 		client.Session.InitHeartbeatAck()
+		client.Session.SetHeartbeatInterval(response.DATA.INTERVAL)
 		handlers.InitConnection(response)
+		startBeating <- true
+		close(startBeating)
 	case 11:
 		log.Printf("Acknowledged Heartbeat")
 		client.Session.ToggleHeartbeatACK()
 		log.Printf("waiting?: %v", client.Session.HeartbeatACK())
+	//case 0:
+	//	processEVENT(response)
+	}
+}
+
+func processEVENT (response types.Response){
+	switch response.EVENT {
+	case "READY":
+		handlers.ReadyConnection(response)
+	case "GUILD_CREATE":
 	}
 }

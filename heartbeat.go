@@ -13,29 +13,29 @@ type HeartbeatRequest struct{
 
 func Heartbeat(stoppedBeating chan bool) {
 	defer close(stoppedBeating)
-	log.Printf("Stating Heartbeat")
-	//interval := client.Session.HearbeatInterval()
-	tick := time.NewTicker(time.Second*2)
+	interval := client.Session.HearbeatInterval()
+	tick := time.NewTicker(time.Second*time.Duration(interval))
 	var counter = 0
-	var request HeartbeatRequest
 	for t := range tick.C{
 			log.Println("Tick at", t)
 			if client.Session.HeartbeatACK() {
 				stoppedBeating <- client.Session.HeartbeatACK()
 				close(stoppedBeating)
 			} else {
-				heartbeat(request, counter)
+				heartbeat(counter)
 				counter = counter + 1
 			}
 	}
 }
 
-func heartbeat(request HeartbeatRequest, counter int) {
+func heartbeat(counter int) {
+	var request HeartbeatRequest
 	request.OPCODE = 1
+	log.Printf("%v", counter)
 	if counter==0 {
 		request.DATA = nil
 	} else {
-		*request.DATA = client.Session.Sequence()
+		request.DATA = client.Session.Sequence()
 	}
 	client.Session.Connection().WriteJSON(&request)
 	client.Session.ToggleHeartbeatACK()

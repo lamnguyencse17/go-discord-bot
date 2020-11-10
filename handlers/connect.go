@@ -3,17 +3,19 @@ package handlers
 import (
 	client "github.com/lamnguyencse17/go-discord-bot/session"
 	types "github.com/lamnguyencse17/go-discord-bot/types"
-	"github.com/mitchellh/mapstructure"
 	"log"
 	"os"
 )
 
 func InitConnection(response types.Response){
-	var connectionData types.ConnectionData
-	if err:= mapstructure.Decode(response, &connectionData); err != nil{
-		log.Fatalf("decode map: %s", err)
-	}
-	client.Session.SetHeartbeatInterval(connectionData.INTERVAL)
+	//var connectionData = types.ConnectionData{}
+	//	////data := response.DATA
+	//	//if err:= mapstructure.Decode(response, &connectionData); err != nil{
+	//	//	log.Fatalf("decode map: %s", err)
+	//	//}
+	//	//client.Session.SetHeartbeatInterval(connectionData.INTERVAL)
+	//var initResponse = response.ParseInitResponse()
+	log.Printf("init Response: %v", response)
 	client.Session.SetSequence(response.SEQUENCE)
 	IdentifyConnection()
 }
@@ -31,4 +33,12 @@ func IdentifyConnection(){
 	IdentifyData.PROPERTIES = IdentifyDataProperties
 	IdentifyRequest.DATA = IdentifyData
 	client.Session.Connection().WriteJSON(&IdentifyRequest)
+}
+
+func ReadyConnection(response types.Response){
+	//var ReadyResponse types.ReadyResponse
+	//ReadyResponse = response.ParseReadyResponse()
+	client.Session.SetSequence(response.SEQUENCE)
+	client.Session.SetSessionID(response.DATA.USER.Session_id)
+	client.Session.SetUser(response.DATA.USER)
 }
